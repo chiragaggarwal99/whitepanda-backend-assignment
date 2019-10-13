@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 router.get('/cars', function(req, res) {
   var MongoClient = mongodb.MongoClient;
 
-  var url = 'mongodb://localhost:27017';
+  var url = 'mongodb+srv://new_user:chirag99@cluster0-qwtph.mongodb.net/?retryWrites=true&w=majority';
 
   MongoClient.connect(url, function(err, client){
     if(err){
