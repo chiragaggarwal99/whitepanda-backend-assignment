@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    h3.
+        Cars
+    ul
+        each car, i in cars
+            li#car_list_item
+                a(href="#") No. #{car.vehicle_number}   Model: #{car.model}
