@@ -195,14 +195,48 @@ router.get('/deletecar/:id', function(req, res){
 
       var query={_id: new mongodb.ObjectID(req.params.id)};
 
-      collection.deleteOne(query, function(err,obj){
+      collection.findOne(query, function(err, result){
         if(err){
-          res.json(err);
           console.log(err);
+        }else if(result){
+          var del = 1;
+          var today = moment(Date.now()).format('DD-MM-YYYY');
+          for (i=0;i<result.booking_dates.length;i++){
+            var d = moment(result.booking_dates[i],"DD-MM-YYYY").format('DD-MM-YYYY')
+            if(d>today){
+              console.log("del1",del);
+              del=0;
+              console.log("del2",del);
+              break;
+            }
+          }
+          if(del){
+            MongoClient.connect(url, function(err, client){
+              if(err){
+                console.log("Unable to connect to server",err);
+              }else{
+                console.log("Connection established");
+          
+                var db = client.db('cars');
+                var collection = db.collection('cars');
+                collection.deleteOne(query, function(err,obj){
+                  if(err){
+                    res.json(err);
+                    console.log(err);
+                  }
+                  else{
+                    res.redirect("/cars");
+                  }
+                });
+              }
+            });
+          }else{
+            res.send("Can't be deleted. Some bookings are pending for this car.");
+          }
+        }else{
+          res.send("Invalid request1.");
         }
-        else{
-          res.redirect("/cars");
-        }
+        client.close();
       });
     }
     client.close();
@@ -333,37 +367,38 @@ router.post('/confirmbook', function(req, res) {
           console.log(err);
         }else{
           data = result.insertedId;
+          console.log(data);
           console.log("booking done");
-        }
-      });
-    }
-    client.close();
-  });
-
-  MongoClient.connect(url, function(err, client){
-    if(err){
-      console.log("Unable to connect to server",err);
-    }else{
-      console.log("Connection established");
-
-      var db = client.db('cars');
-      var collection = db.collection('cars');
-      var query={"_id": new mongodb.ObjectID(sess.car_details._id)};
-      console.log("Query",query);
-      var newvalues  = { $addToSet: { booking_dates:{ $each : sess.dates}}};
-      collection.updateOne(query, newvalues, function(err,obj){
-        if(err){
-          res.json(err);
-          console.log("Error1 ",err);
-        }
-        else{
-          req.session.destroy();
-          res.render("booking_confirm",{
-            data : data
+          MongoClient.connect(url, function(err, client){
+            if(err){
+              console.log("Unable to connect to server",err);
+            }else{
+              console.log("Connection established");
+        
+              var db = client.db('cars');
+              var collection = db.collection('cars');
+              var query={"_id": new mongodb.ObjectID(sess.car_details._id)};
+              console.log("Query",query);
+              var newvalues  = { $addToSet: { booking_dates:{ $each : sess.dates}}};
+              collection.updateOne(query, newvalues, function(err,obj){
+                if(err){
+                  res.json(err);
+                  console.log("Error1 ",err);
+                }
+                else{
+                  req.session.destroy();
+                  console.log(data);
+                  res.render("booking_confirm",{
+                    data : data
+                  });
+                }
+              });
+            }
           });
         }
       });
     }
+    client.close();
   });
 });
 
