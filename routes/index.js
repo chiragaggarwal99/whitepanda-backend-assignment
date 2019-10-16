@@ -69,6 +69,37 @@ router.get('/bookings', function(req, res) {
   });
 });
 
+router.get('/carbooking/:id', function(req, res) {
+  MongoClient.connect(url, function(err, client){
+    if(err){
+      console.log("Unable to connect to server",err);
+    }else{
+      console.log("Connection established");
+      if(!mongodb.ObjectID.isValid(req.params.id)){
+        res.send("Invalid request.");
+        client.close();
+        return;
+      }
+      var query={"car_details._id": new mongodb.ObjectID(req.params.id)};
+
+      var db = client.db('cars');
+      var collection = db.collection('bookings');
+      collection.find({}).toArray(function(err, result){
+        if(err){
+          res.send(err);
+        }else if(result.length){
+          res.render('carbooking',{
+            "bookings": result
+          });
+        }else{
+          res.send("No bookings found for this car");
+        }
+        client.close();
+      });
+    }
+  });
+});
+
 router.get('/viewbooking/:id', function(req, res) {
   MongoClient.connect(url, function(err, client){
     if(err){
