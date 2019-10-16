@@ -80,11 +80,11 @@ router.get('/carbooking/:id', function(req, res) {
         client.close();
         return;
       }
-      var query={"car_details._id": new mongodb.ObjectID(req.params.id)};
+      var query={"car_details._id": req.params.id};
 
       var db = client.db('cars');
       var collection = db.collection('bookings');
-      collection.find({}).toArray(function(err, result){
+      collection.find(query).toArray(function(err, result){
         if(err){
           res.send(err);
         }else if(result.length){
