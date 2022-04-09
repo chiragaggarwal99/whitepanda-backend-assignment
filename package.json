@@ -13,7 +13,7 @@
     "express-session": "^1.17.0",
     "http-errors": "~1.6.3",
     "kerberos": "~1.1.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mongodb": "~3.3.2",
     "morgan": "~1.9.1",
     "pug": "^2.0.4"
